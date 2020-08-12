@@ -52,7 +52,12 @@ void zlibc_free(void *ptr) {
 #if defined(__sun) || defined(__sparc) || defined(__sparc__)
 #define PREFIX_SIZE (sizeof(long long))
 #else
+#ifdef __CHERI_PURE_CAPABILITY__
+/* hack to get 16 bytes aligned pointers for cheri purecap */
+#define PREFIX_SIZE (2*sizeof(size_t))
+#else
 #define PREFIX_SIZE (sizeof(size_t))
+#endif
 #endif
 #endif
 
