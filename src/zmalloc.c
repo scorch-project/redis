@@ -46,18 +46,19 @@ void zlibc_free(void *ptr) {
 #include "zmalloc.h"
 #include "atomicvar.h"
 
+/* With purecap, we don't need to keep the size of allocated buffer as metadata
+ * because this information is already stored in the capability itself */
+#ifdef __CHERI_PURE_CAPABILITY__
+#define HAVE_MALLOC_SIZE
+#endif
+
 #ifdef HAVE_MALLOC_SIZE
 #define PREFIX_SIZE (0)
 #else
 #if defined(__sun) || defined(__sparc) || defined(__sparc__)
 #define PREFIX_SIZE (sizeof(long long))
 #else
-#ifdef __CHERI_PURE_CAPABILITY__
-/* hack to get 16 bytes aligned pointers for cheri purecap */
-#define PREFIX_SIZE (2*sizeof(size_t))
-#else
 #define PREFIX_SIZE (sizeof(size_t))
-#endif
 #endif
 #endif
 
@@ -178,6 +179,16 @@ void *zrealloc(void *ptr, size_t size) {
     return (char*)newptr+PREFIX_SIZE;
 #endif
 }
+
+#ifdef __CHERI_PURE_CAPABILITY__
+size_t zmalloc_size(void *ptr) {
+    return __builtin_cheri_length_get(ptr);
+}
+
+size_t zmalloc_usable(void *ptr) {
+    return zmalloc_size(ptr);
+}
+#endif
 
 /* Provide zmalloc_size() for systems where this function is not provided by
  * malloc itself, given that in that case we store a header with this

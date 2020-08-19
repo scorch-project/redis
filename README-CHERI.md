@@ -3,9 +3,11 @@
 To compile for purecap:
 ```
 gmake distclean
-gmake CC=cheribsd128purecap-clang -C deps/hiredis clean
-gmake CC=cheribsd128purecap-clang -C deps/linenoise
-gmake CC=cheribsd128purecap-clang -C deps/lua/freebsd
 gmake CC=cheribsd128purecap-clang
+```
+
+Transfer the necessary files to the cheri VM:
+```
+scp -P 18999 -r  src/redis-server src/redis-benchmark redis.conf localhost:~
 ```
 
